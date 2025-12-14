@@ -19,6 +19,7 @@ const APP = createApp({
     /** 前期整理数据：筛选被合并曝光的产品 - 开始 */
     let checkMergeObj = ref({});
     let mergeInfoList = ref([]);
+    let mergeInfoListBackUp = [];
     /** 
     循环遍历产品数组
     检查当前曝光id是否已经记录在案
@@ -30,7 +31,7 @@ const APP = createApp({
     */
 
     function formatMergeData() {
-      window.my_app_data.productList?.forEach((product) => {
+      window.my_app_data.productList?.forEach(product => {
         if (product["PID"] in checkMergeObj.value) {
           if (
             checkMergeObj.value[product["PID"]].ridList.indexOf(
@@ -68,22 +69,36 @@ const APP = createApp({
 
     formatMergeData();
 
-    function sortSamePID(list) {
+    function sortSamePID(list, isInit = false) {
       let tempList = [];
-      list.forEach((item) => {
-        let filterRes = products.value.filter(
-          (product) => product.PID === item.PID
-        );
-        tempList.push(...filterRes);
-      });
+
+      if (isInit) {
+        list.forEach(item => {
+          let filterRes = products.value.filter(
+            product => product.PID === item.PID
+          );
+          tempList.push(...filterRes);
+        });
+      } else {
+        let tempPidList = [];
+        list.forEach(item => {
+          if (!tempPidList.includes(item.PID)) tempPidList.push(item.PID);
+        });
+
+        tempPidList.forEach(pid => {
+          let filterRes = list.filter(item => item.PID === pid);
+          tempList.push(...filterRes);
+        });
+      }
 
       return tempList;
     }
 
+    /** 整理被合并的产品数据并展示到表格 ---结束 */
     let pidObj = {};
-    function formatListData(list) {
-      list.forEach((element) => {
-        let count = list.filter((item) => item.PID === element.PID).length;
+    function formatListData(list, isInit = false) {
+      list.forEach(element => {
+        let count = list.filter(item => item.PID === element.PID).length;
 
         if (pidObj?.[element.PID]) {
           pidObj[element.PID] += 1;
@@ -95,13 +110,15 @@ const APP = createApp({
         element.samePIDCount = count;
       });
 
+      isInit && (mergeInfoListBackUp = JSON.stringify(list));
       mergeProducts.value = JSON.parse(JSON.stringify(list));
+      pidObj = {};
 
-      console.log("mergeProducts", mergeProducts.value);
+      return list;
     }
 
-    formatListData(sortSamePID(mergeInfoList.value));
-    /** 整理被合并的产品数据 ---结束 */
+    formatListData(sortSamePID(mergeInfoList.value, true), true);
+    /** 整理被合并的产品数据并展示到表格 ---结束 */
 
     /** 前期整理数据：筛选被合并曝光的产品 - 结束 */
     function PIDSpanMethod({ row, column, rowIndex, columnIndex }) {
@@ -119,7 +136,6 @@ const APP = createApp({
         }
       }
     }
-    /** 整理被合并的产品数据 ---开始 */
 
     // function handleCopy(index, row) {
     function handleCopy(
@@ -134,7 +150,7 @@ const APP = createApp({
           ? document.createElement("textarea")
           : document.createElement("input");
 
-        value = mergeProducts.value.map((product) => product.VID).join("\r\n");
+        value = mergeProducts.value.map(product => product.VID).join("\r\n");
         // 设置文本，去掉换行时替换为一个空格
         el.value = keepLineBreak ? value : value.replace(/\n/g, " ");
 
@@ -168,20 +184,59 @@ const APP = createApp({
     // 搜索相关数据与逻辑
     const defaultForm = {
       RID: "",
+      RID_exclude: false,
     };
 
-    const searchForm = ref({
-      RID: "",
+    const searchForm = ref({});
+
+    function handleReset() {
+      searchForm.value = JSON.parse(JSON.stringify(defaultForm));
+      mergeProducts.value = JSON.parse(mergeInfoListBackUp);
+    }
+
+    onMounted(() => {
+      searchForm.value = JSON.parse(JSON.stringify(defaultForm));
     });
 
-    function resetSearchForm() {
-      searchForm.value = {
-        ...defaultForm,
-      };
+    function checkSearch() {
+      return JSON.stringify(searchForm.value) == JSON.stringify(defaultForm);
+    }
+
+    function filterRID() {
+      let filterRes = JSON.parse(mergeInfoListBackUp).filter(
+        info => info.RID === searchForm.value.RID
+      );
+
+      return filterRes;
+    }
+
+    function filterRIDExclude() {
+      let filterRes = JSON.parse(mergeInfoListBackUp).filter(
+        info => info.RID !== searchForm.value.RID
+      );
+
+      return filterRes;
     }
 
     function handleSearch() {
-      console.log("我是搜索按钮");
+      if (checkSearch()) {
+        mergeProducts.value = JSON.parse(mergeInfoListBackUp);
+
+        return;
+      }
+
+      let searchRes = [];
+
+      if (searchForm.value.RID_exclude) {
+        searchRes = filterRIDExclude();
+      } else {
+        searchRes = filterRID();
+      }
+      console.info("搜索结果：", searchRes);
+
+      formatListData(sortSamePID(searchRes));
+
+      // mergeProducts.value = searchRes;
     }
 
     return {
@@ -193,7 +248,7 @@ const APP = createApp({
       PIDSpanMethod,
       handleCopy,
       searchForm,
-      resetSearchForm,
+      handleReset,
       handleSearch,
     };
   },
