@@ -1,0 +1,42 @@
+html,body {
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+  overflow: auto;
+  padding: 20px 40px;
+  box-sizing: border-box;
+}
+
+.merge-description {
+  margin-bottom: 20px;
+}
+
+.table-header-style {
+  background-color: red;
+  color: aliceblue;
+}
+
+:deep(.el-table .my-custom-header-class) {
+  background: linear-gradient(to right, #8e2de2, #4a00e0);
+  color: #fff;
+  font-size: 14px;
+}
+/* 针对特定列的样式 */
+:deep(.el-table .my-custom-header-class .cell) {
+  font-weight: bold;
+}
+
+.product-table {}
+
+.product-table .search-box {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.product-table .search-box .search-btns {
+  margin-left: 8px;
+}

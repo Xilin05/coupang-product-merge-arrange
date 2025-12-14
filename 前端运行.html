@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+
+  <!-- 建议使用明确的协议（https:），避免使用协议相对URL（//） -->
+  <!-- 引入ElementPlus样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <!-- 引入Vue 3 -->
+  <script src="https://unpkg.com/vue@3"></script>
+  <!-- 引入ElementPlus组件库 -->
+  <script src="https://unpkg.com/element-plus"></script>
+  <!-- 引入ElementPlus icon组件库 -->
+   <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@element-plus/icons-vue"></script> -->
+
+  <link rel="stylesheet" href="./css/index.css" />
+</head>
+
+<body>
+  <div id="app">
+    <div class="merge-description">
+      <template v-if="!mergeInfoList.length">
+        <el-text size="large" type="success" style="display: flex; align-items: center;">
+          <!-- <el-icon><Check /></el-icon> -->
+            <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="width: 28px; margin-right: 4px;"><path fill="currentColor" d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896m-55.808 536.384-99.52-99.584a38.4 38.4 0 1 0-54.336 54.336l126.72 126.72a38.27 38.27 0 0 0 54.336 0l262.4-262.464a38.4 38.4 0 1 0-54.272-54.336z"></path></svg>
+          未检测到被合并曝光商品信息
+        </el-text>
+        <!-- <div class="empty-merge-list">
+          未检测到被合并曝光商品信息
+        </div> -->
+      </template>
+      <template v-else>
+      <el-descriptions title="被合并曝光商品信息" border>
+          <template v-for="(obj, index) in mergeInfoList">
+            <el-descriptions-item label-width="120" width="120" :label="`${index + 1}. 商品曝光ID`""
+                >{{ obj.PID }}</el-descriptions-item
+              >
+              <el-descriptions-item label-width=" 120" width="80" label="合并商品个数">{{ obj.ridList.length
+              }}</el-descriptions-item>
+            <el-descriptions-item label-width="120" label="合并产品">
+              {{ obj.skuList.map(item => item.PN).join(", ") }}
+            </el-descriptions-item>
+          </template>
+        </el-descriptions>
+      </template>
+    </div>
+
+    <div class="product-table">
+      <div class="search-box">
+        <el-input v-model="searchForm.RID" style="width: 240px" placeholder="注册商品ID"></el-input>
+
+        <div class="search-btns">
+          <el-button type="primary" @click="handleSearch">
+            <svg style="width: 14px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="m795.904 750.72 124.992 124.928a32 32 0 0 1-45.248 45.248L750.656 795.904a416 416 0 1 1 45.248-45.248zM480 832a352 352 0 1 0 0-704 352 352 0 0 0 0 704"></path></svg>搜索
+          </el-button>
+          <el-button type="danger" @click="resetSearchForm">
+            <svg style="width: 14px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="M771.776 794.88A384 384 0 0 1 128 512h64a320 320 0 0 0 555.712 216.448H654.72a32 32 0 1 1 0-64h149.056a32 32 0 0 1 32 32v148.928a32 32 0 1 1-64 0v-50.56zM276.288 295.616h92.992a32 32 0 0 1 0 64H220.16a32 32 0 0 1-32-32V178.56a32 32 0 0 1 64 0v50.56A384 384 0 0 1 896.128 512h-64a320 320 0 0 0-555.776-216.384z"></path></svg>
+            重置
+          </el-button>
+        </div>
+      </div>
+      <el-table border style="width: 100%" height="800" align="" :header-cell-style="{
+    backgroundColor: '#F6F9FC',
+    color: '#82909F',
+  }" empty-text="空数据" :data="mergeProducts" :span-method="PIDSpanMethod">
+        <el-table-column label="商品曝光ID">
+          <template #default="scope">
+            <div style="display: flex; align-items: center; justify-content: center;">
+              <el-link type="primary" @click="openCoupangLink(scope.row)">{{ scope.row.PID }}</el-link>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="注册商品ID" prop="RID" width="120"></el-table-column>
+        <el-table-column label="产品管理名称" prop="PN"></el-table-column>
+        <el-table-column label="SKU名称" prop="SKUNAME"></el-table-column>
+        <el-table-column label="SKU编码" prop="SKUID"></el-table-column>
+        <el-table-column prop="VID">
+          <template #header="scope">
+            <div style="display: flex;justify-content:space-around;align-items:center;">
+              <span>选项ID</span>
+              <el-button size="" text type="primary" @click="handleCopy(scope.$index, scope.row)">
+                复制整列
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
+
+  <!-- 引入产品数组js文件 -->
+  <script src="./产品信息JSON/20251213-产品信息json.js"></script>
+
+  <!-- vue应用代码文件 -->
+  <script src="./js/main.js"></script>
+</body>
+
+</html>
