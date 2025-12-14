@@ -137,7 +137,6 @@ const APP = createApp({
       }
     }
 
-    // function handleCopy(index, row) {
     function handleCopy(
       value,
       { keepLineBreak = true, onSuccess = () => {}, onError = () => {} } = {}
@@ -170,10 +169,12 @@ const APP = createApp({
 
         if (success) {
           onSuccess();
+          ElementPlus.ElMessage.success("复制成功");
         } else {
           throw new Error("复制命令返回 false");
         }
       } catch (err) {
+        ElementPlus.ElMessage.error("复制失败");
         console.error("复制失败:", err);
         onError(err);
       }
