@@ -55,15 +55,31 @@
 
     <div class="product-table">
       <div class="search-box">
-        <el-input v-model="searchForm.RID" style="width: 320px" placeholder="输入注册商品ID" clearable>
-          <template #prepend>
-            注册商品ID
-          </template>
+        <!-- 注册商品id搜索框 -->
+        <div class="search-box-item">
+          <el-input v-model="searchForm.RID" style="width: 320px" placeholder="输入注册商品ID" clearable>
+            <template #prepend>
+              注册商品ID
+            </template>
 
-          <template #append>
-            <el-checkbox v-model="searchForm.RID_exclude" label="取反" size=""></el-checkbox>
-          </template>
-        </el-input>
+            <template #append>
+              <el-checkbox v-model="searchForm.RID_exclude" label="取反" size=""></el-checkbox>
+            </template>
+          </el-input>
+        </div>
+
+        <!-- 商品曝光id搜索框 -->
+        <div class="search-box-item">
+          <el-input v-model="searchForm.PID" style="width: 320px" placeholder="输入商品曝光ID" clearable>
+            <template #prepend>
+              商品曝光ID
+            </template>
+
+            <template #append>
+              <el-checkbox v-model="searchForm.PID_union" label="联查" size=""></el-checkbox>
+            </template>
+          </el-input>
+        </div>
 
         <div class="search-btns">
           <el-button type="primary" @click="handleSearch">

@@ -186,6 +186,8 @@ const APP = createApp({
     const defaultForm = {
       RID: "",
       RID_exclude: false,
+      PID: "",
+      PID_union: false,
     };
 
     const searchForm = ref({});

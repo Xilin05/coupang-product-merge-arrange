@@ -37,6 +37,11 @@ html,body {
   margin-bottom: 12px;
 }
 
+.product-table .search-box .search-box-item {}
+.search-box-item+.search-box-item {
+  margin-left: 8px;
+}
+
 .product-table .search-box .search-btns {
   margin-left: 8px;
 }
