@@ -16,19 +16,35 @@ const APP = createApp({
       );
     }
 
+    const productFileList = ref([]);
+
+    function handleRemove(file) {
+      productFileList.value = productFileList.value.filter(
+        f => f.uid !== file.uid
+      );
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return "0 B";
+      const k = 1024;
+      const sizes = ["B", "KB", "MB", "GB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
+
     /** excel文件处理 - 开始 */
     // 用于存储解析后的JSON数据
     const jsonData = ref([]);
 
     // 处理文件变化的函数
-    const handleFileChange = (uploadFile) => {
+    const handleFileChange = uploadFile => {
       const file = uploadFile.raw; // 获取原始的File对象
       if (!file) {
         return;
       }
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           // 1. 读取文件内容为ArrayBuffer
           const data = new Uint8Array(e.target.result);
@@ -94,7 +110,7 @@ const APP = createApp({
     */
 
     function formatMergeData() {
-      window.my_app_data.productList?.forEach((product) => {
+      window.my_app_data.productList?.forEach(product => {
         if (product["PID"] in checkMergeObj.value) {
           if (
             checkMergeObj.value[product["PID"]].ridList.indexOf(
@@ -136,20 +152,20 @@ const APP = createApp({
       let tempList = [];
 
       if (isInit) {
-        list.forEach((item) => {
+        list.forEach(item => {
           let filterRes = products.value.filter(
-            (product) => product.PID === item.PID
+            product => product.PID === item.PID
           );
           tempList.push(...filterRes);
         });
       } else {
         let tempPidList = [];
-        list.forEach((item) => {
+        list.forEach(item => {
           if (!tempPidList.includes(item.PID)) tempPidList.push(item.PID);
         });
 
-        tempPidList.forEach((pid) => {
-          let filterRes = list.filter((item) => item.PID === pid);
+        tempPidList.forEach(pid => {
+          let filterRes = list.filter(item => item.PID === pid);
           tempList.push(...filterRes);
         });
       }
@@ -161,7 +177,7 @@ const APP = createApp({
     let pidObj = {};
     function formatListData(list, isInit = false) {
       list.forEach((element, index) => {
-        let count = list.filter((item) => item.PID === element.PID).length;
+        let count = list.filter(item => item.PID === element.PID).length;
 
         if (pidObj?.[element.PID]) {
           pidObj[element.PID] += 1;
@@ -214,7 +230,7 @@ const APP = createApp({
           ? document.createElement("textarea")
           : document.createElement("input");
 
-        value = mergeProducts.value.map((product) => product.VID).join("\r\n");
+        value = mergeProducts.value.map(product => product.VID).join("\r\n");
         // 设置文本，去掉换行时替换为一个空格
         el.value = keepLineBreak ? value : value.replace(/\n/g, " ");
 
@@ -275,7 +291,7 @@ const APP = createApp({
 
     function filterRID() {
       let filterRes = JSON.parse(mergeInfoListBackUp).filter(
-        (info) => info.RID === searchForm.value.RID
+        info => info.RID === searchForm.value.RID
       );
 
       return filterRes;
@@ -283,7 +299,7 @@ const APP = createApp({
 
     function filterRIDExclude() {
       let filterRes = JSON.parse(mergeInfoListBackUp).filter(
-        (info) => info.RID !== searchForm.value.RID
+        info => info.RID !== searchForm.value.RID
       );
 
       return filterRes;
@@ -313,11 +329,11 @@ const APP = createApp({
 
       if (searchForm.value.PID_first) {
         searchRes = JSON.parse(mergeInfoListBackUp).filter(
-          (info) => info.PID == searchForm.value.PID
+          info => info.PID == searchForm.value.PID
         );
       }
 
-      let filterRes = searchRes.filter((info) => {
+      let filterRes = searchRes.filter(info => {
         // 先判断是否级联：
         //   级联：&&，不级联：||
         // 再判断是否取反：
@@ -351,7 +367,7 @@ const APP = createApp({
     }
 
     function wait(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async function handleLoading() {
@@ -369,6 +385,9 @@ const APP = createApp({
     );
 
     return {
+      productFileList,
+      handleRemove,
+      formatSize,
       jsonData,
       handleFileChange,
       products,

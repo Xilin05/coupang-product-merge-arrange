@@ -15,29 +15,62 @@ html,body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+  height: 150px;
 }
 
 .upload-product-excel {
   min-width: 200px;
   width: 15%;
+  height: 80%;
 }
 
 .upload-product-excel .component-upload {
   /* height: 200px; */
   /* min-width: 240px; */
+  display: flex;
+  flex-direction: column;
+  justify-content:flex-start;
+  /* height: 150px; */
+    /* align-items: flex-start; */
 }
 
 .el-upload .el-upload-dragger {
-  /* padding: 8px 20px; */
+  padding: 8px 20px;
 }
 
-.component-upload-slot-filelist {}
+.component-upload-slot-filelist {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0px 8px;
+}
+
+.component-upload-slot-filelist .file-container {
+  width: 80%;
+  display: flex;
+  align-items: center;
+}
+
+.component-upload-slot-filelist .file-remove-btn {
+  cursor: pointer;
+}
+
+.component-upload-slot-filelist .file-remove-btn:hover {
+  color: rgb(121, 187, 255);
+}
+
 .icon-file-excel {}
 
 .merge-description {
   width: 83%;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
+  overflow: auto;
+}
+.merge-description .el-descriptions .el-descriptions__header {
+  margin-bottom: 12px;
 }
 
 .table-header-style {
