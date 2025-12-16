@@ -11,7 +11,32 @@ html,body {
   box-sizing: border-box;
 }
 
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.upload-product-excel {
+  min-width: 200px;
+  width: 15%;
+}
+
+.upload-product-excel .component-upload {
+  /* height: 200px; */
+  /* min-width: 240px; */
+}
+
+.el-upload .el-upload-dragger {
+  /* padding: 8px 20px; */
+}
+
+.component-upload-slot-filelist {}
+.icon-file-excel {}
+
 .merge-description {
+  width: 83%;
   margin-bottom: 20px;
 }
 
