@@ -37,7 +37,7 @@
           :on-change="handleFileChange"
         >
           <!-- <el-icon class="el-icon--upload"><upload-filled /></el-icon> -->
-          <el-icon size="30"><Plus /></el-icon>
+          <el-icon size="30" style="color:#909399;"><Plus /></el-icon>
           <!-- <div class="el-upload__text">将Coupang产品Excel文件拖到此处，或<em>点击上传</em></div> -->
           <div class="el-upload__text">将Excel文件拖到框内，或
             <div>
@@ -60,17 +60,10 @@
             </div>
           </template>
         </el-upload>
-  
-          <!-- 用于展示解析后的JSON数据或分析结果 -->
-          <!-- 这里可以进一步展示或处理 jsonData -->
-          <!-- 预览前两条数据 -->
-          <!-- <div v-if="jsonData.length > 0" class="data-preview">
-            <div>解析成功！共获取 {{ jsonData.length }} 条产品记录</div>
-            <pre>{{ JSON.stringify(jsonData.slice(0, 2), null, 2) }}</pre>
-          </div> -->
       </div>
-  
+
       <div class="merge-description">
+        <!-- <template></template> -->
         <template v-if="!mergeInfoList.length">
           <el-text size="large" type="success" style="display: flex; align-items: center;">
             <!-- <el-icon><Check /></el-icon> -->
@@ -91,10 +84,10 @@
               <el-descriptions-item label-width="120" width="120" :label="`${index + 1}. 商品曝光ID`""
                   >{{ obj.PID }}</el-descriptions-item
                 >
-                <el-descriptions-item label-width=" 120" width="80" label="合并商品个数">{{ obj.ridList.length
+                <el-descriptions-item label-width=" 120" width="80" label="合并商品个数">{{ obj.productList.length
                 }}</el-descriptions-item>
               <el-descriptions-item label-width="120" label="合并产品">
-                {{ obj.skuList.map(item => item.PN).join(", ") }}
+                {{ obj.productList.map(item => item.PN).join(", ") }}
               </el-descriptions-item>
             </template>
           </el-descriptions>
@@ -104,6 +97,11 @@
 
     <div class="product-table">
       <div class="search-box">
+        <el-button type="primary" plain style="margin-right: 8px;" @click="downloadTemplate">
+          <el-icon style="margin-right: 4px;"><Download /></el-icon>
+          下载模板
+        </el-button>
+
         <!-- 商品曝光id搜索框 -->
         <div class="search-box-item">
           <el-input v-model="searchForm.PID" style="width: 320px" placeholder="输入商品曝光ID" clearable>
@@ -167,7 +165,7 @@
           backgroundColor: '#F6F9FC',
           color: '#82909F'
         }"
-        :data="mergeProducts"
+        :data="formatProductList"
         :span-method="PIDSpanMethod"
       >
         <el-table-column label="商品曝光ID">
@@ -177,7 +175,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="注册商品ID" prop="indexRID" width="160"></el-table-column>
+        <el-table-column label="注册商品ID" prop="groupIndexShow" width="160"></el-table-column>
         <el-table-column label="产品管理名称" prop="PN"></el-table-column>
         <el-table-column label="SKU名称" prop="SKUNAME"></el-table-column>
         <el-table-column label="SKU编码" prop="SKUID"></el-table-column>
@@ -197,7 +195,7 @@
 
   <!-- 引入产品数组js文件 -->
   <!-- <script src="./产品信息JSON/20251212-产品信息json.js"></script> -->
-  <script src="./产品信息JSON/20251212-产品信息json.js"></script>
+  <script src="./产品信息JSON/20251216-产品信息json.js"></script>
 
   <!-- vue应用代码文件 -->
   <script src="./js/main.js"></script>
@@ -206,7 +204,7 @@
     // fetch('https://www.coupang.com/next-api/products/quantity-info?productId=9239798438&vendorItemId=94271584245')
     //   .then(response => {
     //     console.log('response', response);
-        
+
     //     // 检查响应是否成功
     //     if (!response.ok) {
     //       throw new Error('网络响应异常');
