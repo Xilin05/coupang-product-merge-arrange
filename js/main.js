@@ -14,7 +14,7 @@ const APP = createApp({
     function downloadTemplate() {
       // 1. 定义模板表头和示例数据
       const templateData = [
-        ["RID", "PID", "VID", "SKUID", "PN", "SKUNAME"] // 表头行
+        ["RID", "PID", "VID", "SKUID", "PN", "SKUNAME"], // 表头行
       ];
 
       // 2. 使用SheetJS创建Workbook和工作表
@@ -25,10 +25,10 @@ const APP = createApp({
       // 3. 生成Excel文件并触发下载
       const excelBuffer = XLSX.write(workbook, {
         bookType: "xlsx",
-        type: "array"
+        type: "array",
       });
       const blob = new Blob([excelBuffer], {
-        type: "application/octet-stream"
+        type: "application/octet-stream",
       });
 
       const downloadUrl = URL.createObjectURL(blob);
@@ -49,7 +49,7 @@ const APP = createApp({
     // 移除文件
     function handleRemove(file) {
       productFileList.value = productFileList.value.filter(
-        f => f.uid !== file.uid
+        (f) => f.uid !== file.uid
       );
     }
 
@@ -71,7 +71,7 @@ const APP = createApp({
       "VID",
       "SKUID",
       "PN",
-      "SKUNAME"
+      "SKUNAME",
     ]);
     const uploadError = ref("");
     // 用于存储解析后的JSON数据
@@ -81,12 +81,13 @@ const APP = createApp({
     let excelPidList = [];
     const mergeInfoList = ref([]);
 
+    // 分析重复曝光的产品
     function analysisRepeatProduct(list) {
-      excelPidList.forEach(pid => {
-        const filterIPIDRes = list.filter(item => item.PID == pid);
+      excelPidList.forEach((pid) => {
+        const filterIPIDRes = list.filter((item) => item.PID == pid);
         // const filterRepeatRes = group.filter((item, index, self) => self.findIndex(el => el.RID == item.RID) === index)
         const filterRepeatRes = filterIPIDRes.reduce((acc, curr) => {
-          if (!acc.some(product => product.RID === curr.RID)) {
+          if (!acc.some((product) => product.RID === curr.RID)) {
             acc.push(curr);
           }
           return acc;
@@ -95,21 +96,21 @@ const APP = createApp({
         if (filterRepeatRes.length > 1) {
           mergeInfoList.value.push({
             PID: pid,
-            productList: filterRepeatRes
+            productList: filterRepeatRes,
           });
         }
       });
     }
 
     // 上传文件后，处理文件数据
-    const handleFileChange = uploadFile => {
+    const handleFileChange = (uploadFile) => {
       const file = uploadFile.raw;
       if (!file) return;
 
       uploadError.value = ""; // 清空错误信息
 
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
@@ -178,7 +179,7 @@ const APP = createApp({
     };
 
     // 处理有效数据
-    const processData = dataArray => {
+    const processData = (dataArray) => {
       excelJsonData.value = dataArray.map((row, index) => {
         return {
           RID: row[0] || "",
@@ -186,7 +187,7 @@ const APP = createApp({
           VID: row[2] || "",
           SKUID: row[3] || "",
           PN: row[4] || "",
-          SKUNAME: row[5] || ""
+          SKUNAME: row[5] || "",
         };
       });
       ElementPlus.ElMessage.success(
@@ -216,7 +217,7 @@ const APP = createApp({
        * 3. 每个合并曝光相关的产品注册名称
        */
 
-      list.forEach(element => {
+      list.forEach((element) => {
         let pid = element.PID;
         if (!(pid in groups)) {
           groups[pid] = [];
@@ -233,7 +234,7 @@ const APP = createApp({
       });
 
       const result = [];
-      pidList.forEach(pid => {
+      pidList.forEach((pid) => {
         const group = groups[pid];
 
         group.forEach((item, index) => {
@@ -241,7 +242,7 @@ const APP = createApp({
             ...item,
             groupIndex: index + 1,
             groupCount: group.length,
-            groupIndexShow: `${index + 1}. ${item.RID}`
+            groupIndexShow: `${index + 1}. ${item.RID}`,
           });
         });
       });
@@ -252,10 +253,148 @@ const APP = createApp({
     }
     /** excel文件处理 - 结束 */
 
-    /** 前期整理数据：筛选被合并曝光的产品 - 开始 */
-    let checkMergeObj = ref({});
+    // 这里是针对跨境店 - 粘贴html代码，分析并整理获取数据
+    const dialogVisible = ref(false);
+    const parseLoading = ref(false);
+    const htmlContent = ref("");
 
-    /** 整理被合并的产品数据并展示到表格 ---结束 */
+    function handleDialogClose(done) {
+      ElementPlus.ElMessageBox.confirm(
+        "确定关闭当前弹窗吗？未保存的数据将丢失。",
+        "提示",
+        {
+          type: "warning",
+        }
+      )
+        .then(() => {
+          done();
+        })
+        .catch(() => {
+          // catch error
+        });
+    }
+
+    function parseParentRow(row) {
+      const reg_row = /^(\S+)\n(\S+)\n\|\n注册商品ID\s*(\d+)$/;
+      const match = row.children[1].innerText.match(reg_row);
+
+      if (!match) {
+        console.warn(`无法解析父级内容: ${row.children[1].innerText}`);
+        return null; // 匹配失败时返回 null
+      }
+
+      return {
+        rowIndex: row.rowIndex,
+        PN: match[1], // 产品型号
+        shipmentMethod: match[2], // 发货方式
+        RID: match[3], // 注册商品ID
+      };
+    }
+
+    function parseChildRow(row) {
+      const reg_crow = /^(\S+)\n(\S+)\n选项ID\s*(\d+)\n\|\n商品ID\s*(\d+)\s*$/;
+      const match = row.children[1].innerText.match(reg_row);
+
+      if (!match) {
+        console.warn(`无法解析子级内容: ${row.children[1].innerText}`);
+        return null; // 匹配失败时返回 null
+      }
+
+      return {
+        SKUNAME: cmatch[1], // 尺寸
+        SKU_shipmentMethod: cmatch[2], // 发货方式
+        VID: cmatch[3], // 选项ID
+        PID: cmatch[4], // 商品ID
+      };
+    }
+
+    function parseHTMLContent() {
+      // parseLoading.value = true;
+      // 1. 使用DOMParser解析HTML字符串
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlContent.value, "text/html");
+
+      // 2. 准备一个数组来存储提取到的产品信息
+      // const productList = [];
+
+      // 3. 根据Coupang页面的实际结构，使用选择器定位产品元素
+      // 注意：以下选择器是示例，您需要通过检查Coupang页面来确定正确的选择器
+      // 可能的元素：包含产品信息的div，类名可能是 '.product', '.prod-item', '[data-product-id]' 等
+      const productElements = doc.querySelectorAll(".list-container"); // 请替换为实际的选择器
+      console.log("productElements", productElements);
+
+      if (productElements.length === 0) {
+        ElementPlus.ElMessage.error(
+          "未在粘贴的HTML中发现产品列表，请确认复制了正确区域。"
+        );
+        parseLoading.value = false;
+        return;
+      }
+
+      const productList = Array.from(
+        productElements[0].children[0].children[1].children
+      );
+
+      console.log("解析获取到的 productList", productList);
+
+      const parseProductList = [];
+      let currParent = null;
+      let currRow = null;
+
+      const tempParent = {};
+      const tempRow = {};
+
+      // const reg_row = /^(.+)\n(.+)\n\|\n注册商品ID (\d+)$/;
+      // const reg_crow =
+      //   /^([^\n]+)\n([^\n]+)\n选项ID\s+(\d+)\n\|\n商品ID\s+(\d+)\s*$/;
+
+      const reg_row = /^(\S+)\n(\S+)\n\|\n注册商品ID\s*(\d+)$/;
+      const reg_crow = /^(\S+)\n(\S+)\n选项ID\s*(\d+)\n\|\n商品ID\s*(\d+)\s*$/;
+
+      productList.forEach((row, index) => {
+        if (row.className == "inventory-line") {
+          tempParent = {};
+          let match = row.children[1].innerText.match(reg_row);
+          tempParent = {
+            rowIndex: row.rowIndex,
+            // 产品型号: "BSM-030_A20250817"
+            PN: match[1],
+            // 发货方式: "CGF LITE"
+            shipmentMethod: match[2],
+            // 注册商品ID: "15712184814"
+            RID: match[3],
+          };
+        }
+
+        if (row.className == "item-line") {
+          if (row.rowIndex !== tempRow?.rowIndex) {
+            if ("行编号" in tempRow) {
+              parseProductList.push(JSON.parse(JSON.stringify(tempRow)));
+            }
+          }
+
+          let cmatch = row.children[1].innerText.match(reg_crow);
+          tempRow = {
+            ...tempParent,
+            // 尺寸
+            SKUNAME: cmatch[1],
+            // 发货方式
+            SKU_shipmentMethod: cmatch[2],
+            // 选项ID
+            VID: cmatch[3],
+            // 商品ID
+            PID: cmatch[4],
+          };
+        }
+
+        if (index == listcon.length - 1) {
+          parseProductList.push(JSON.parse(JSON.stringify(tempRow)));
+        }
+      });
+
+      parseLoading.value = false;
+      // dialogVisible.value = false
+    }
 
     /** 前期整理数据：筛选被合并曝光的产品 - 结束 */
     function PIDSpanMethod({ row, column, rowIndex, columnIndex }) {
@@ -263,12 +402,12 @@ const APP = createApp({
         if (row.groupIndex === 1) {
           return {
             rowspan: row.groupCount,
-            colspan: 1
+            colspan: 1,
           };
         } else {
           return {
             rowspan: 0,
-            colspan: 0
+            colspan: 0,
           };
         }
       }
@@ -287,7 +426,7 @@ const APP = createApp({
           : document.createElement("input");
 
         value = formatProductList.value
-          .map(product => product.VID)
+          .map((product) => product.VID)
           .join("\r\n");
         // 设置文本，去掉换行时替换为一个空格
         el.value = keepLineBreak ? value : value.replace(/\n/g, " ");
@@ -326,7 +465,7 @@ const APP = createApp({
       RID_exclude: false,
       PID: "",
       PID_first: true,
-      union: 0
+      union: 0,
     };
 
     const searchForm = ref({});
@@ -374,10 +513,10 @@ const APP = createApp({
       let searchList = [...formatProductListBackUp];
 
       if (PID_first) {
-        searchList = searchList.filter(info => info.PID == PID);
+        searchList = searchList.filter((info) => info.PID == PID);
       }
 
-      searchList = searchList.filter(info => {
+      searchList = searchList.filter((info) => {
         let ridMatch = info.RID == RID;
         let pidMatch = info.PID == PID;
 
@@ -387,12 +526,8 @@ const APP = createApp({
         //   取反：!==，不取反：===
         if (union === 1) {
           return RID_exclude ? !ridMatch && pidMatch : ridMatch && pidMatch;
-          // if (RID_exclude) return !ridMatch && pidMatch;
-          // return ridMatch && pidMatch;
         } else {
           return RID_exclude ? !ridMatch || pidMatch : ridMatch || pidMatch;
-          // if (RID_exclude) return !ridMatch || pidMatch;
-          // return ridMatch || pidMatch;
         }
       });
 
@@ -401,7 +536,7 @@ const APP = createApp({
     }
 
     function wait(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     async function handleLoading() {
@@ -420,23 +555,32 @@ const APP = createApp({
 
     return {
       downloadTemplate,
+
+      // excel文件上传 - 相关数据与方法
       productFileList,
       handleRemove,
       formatSize,
-      excelJsonData,
       handleFileChange,
       openCoupangLink,
-      checkMergeObj,
       formatProductList,
       mergeInfoList,
+
+      // 跨境店 - 相关数据与方法
+      dialogVisible,
+      parseLoading,
+      htmlContent,
+      parseHTMLContent,
+      handleDialogClose,
+
+      // 表格 - 相关数据与方法
       PIDSpanMethod,
       handleCopy,
       searchForm,
       handleReset,
       handleSearch,
-      tableLoading
+      tableLoading,
     };
-  }
+  },
 });
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
