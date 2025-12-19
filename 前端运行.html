@@ -101,6 +101,7 @@
 
     <div class="product-table">
       <div class="search-box">
+        <div class="search-box-items">
         <!-- 商品曝光id搜索框 -->
         <div class="search-box-item">
           <el-input v-model="searchForm.PID" style="width: 320px" placeholder="输入商品曝光ID" clearable>
@@ -152,8 +153,9 @@
             重置
           </el-button>
         </div>
+        </div>
 
-        <div class="table-header-btns" style="margin-left: 12px;">
+        <div class="table-header-btns">
           <el-button type="primary" plain @click="downloadTemplate">
             <el-icon style="margin-right: 4px;">
               <Download />
@@ -177,19 +179,35 @@
           <template #default="scope">
             <div style="display: flex; align-items: center; justify-content: center;">
               <el-link type="primary" @click="openCoupangLink(scope.row)">{{ scope.row.PID }}</el-link>
+              <div class="custom-text-btn" @click="handleCopy(scope.row.PID, { mode: 'single' })">
+                <svg style="width: 12px; height:16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="M128 320v576h576V320zm-32-64h640a32 32 0 0 1 32 32v640a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V288a32 32 0 0 1 32-32M960 96v704a32 32 0 0 1-32 32h-96v-64h64V128H384v64h-64V96a32 32 0 0 1 32-32h576a32 32 0 0 1 32 32M256 672h320v64H256zm0-192h320v64H256z"></path></svg>
+              </div>
             </div>
           </template>
         </el-table-column>
         <el-table-column label="注册商品ID" prop="groupIndexShow" width="160"></el-table-column>
         <el-table-column label="产品管理名称" prop="PN"></el-table-column>
+        <el-table-column label="产品图片" align="center" prop="skuImgurl" width="90">
+          <template #default="scope">
+            <div style="width: 100%; display: flex; align-items: center; justify-content: center;">
+              <el-image ref="imageRef" style="width: 36px; height: 36px; " :src="scope?.row?.skuImgurl || ''" fit="cover" @click="handleImagePreview(scope?.row?.skuImgurl || '')">
+                <template #error>
+                  <!-- <div class="image-error-placeholder" style=""> -->
+                    <svg t="1766151076232" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4428" width="32" height="32"><path d="M854.5 82h-685c-58.2 0-105.4 49.2-105.4 109.8v640.4c0 60.6 47.2 109.8 105.4 109.8H854.6c58.2 0 105.4-49.2 105.4-109.8V191.8C959.9 131.2 912.7 82 854.5 82zM223.6 223.3l11.3-11.7c8.1-8.4 54.7 22.5 101.4 64.9 46.9-42.8 93.4-73.4 101.5-64.9l11.3 11.7c9.6 10-20.2 57.3-61.3 105.3 41.9 47.3 71.3 94.3 60.6 105.5l-11.3 11.7c-10.6 11-55.3-19.8-100.8-63.1-45.4 43-90.3 74-100.8 63.1L224.3 434c-10.5-11 19.3-58.3 60.7-105.5-40.9-47.8-70.9-95.3-61.4-105.2z m630.9 590.6c-12.9 41.9 0.6 36.6-333.7 36.6-338.1 0-342.2-0.8-351.3-47.8-14.2-73.5 64.8-246.2 122.9-208.3 24.9 16.2 81.4 72.5 105.4 73.2 126.9 3.9 212.1-237.9 298.6-237.9 82.3 0 190.8 278.1 158.1 384.2z" p-id="4429" fill="#cdcdcd"></path></svg>
+                  <!-- </div> -->
+                </template>
+              </el-image>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column label="SKU名称" prop="SKUNAME"></el-table-column>
-        <el-table-column label="SKU编码" prop="SKUID"></el-table-column>
+        <el-table-column label="选项ID" prop="SKUID"></el-table-column>
         <el-table-column prop="VID">
           <template #header="scope">
             <!-- <div style="display: flex;justify-content:space-around;align-items:center;"> -->
             <div style="display: flex;align-items:center;">
               <span>选项ID</span>
-              <el-button text type="primary" style="margin-left: 12px;" @click="handleCopy(scope.$index, scope.row)">
+              <el-button text type="primary" style="margin-left: 12px;" @click="handleCopy(scope.row)">
                 复制整列
               </el-button>
             </div>
@@ -213,6 +231,8 @@
         </div>
       </template>
     </el-dialog>
+
+    <el-image-viewer v-if="showImagePreview" :url-list="[imagePreviewUrl]" show-progress @close="showImagePreview = false" />
   </div>
 
   <!-- 引入产品数组js文件 -->

@@ -92,11 +92,21 @@ html,body {
 .product-table {}
 
 .product-table .search-box {
+  width: 100%;
   display: flex;
   margin-bottom: 12px;
+  align-items: center;
 }
 
-.product-table .search-box .search-box-item {}
+.search-box-items {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-grow: 1;
+}
+
+.product-table .search-box .search-box-items .search-box-item {}
+
 .search-box-item+.search-box-item {
   margin-left: 8px;
 }
@@ -105,10 +115,29 @@ html,body {
   margin-left: 8px;
 }
 
+.table-header-btns {
+  /* display: flex; */
+}
+
 .product-table .search-box .el-input-group--prepend {
   
 }
 
 .product-table .search-box .el-input-group--prepend .el-input-group__prepend {
   padding: 0 8px;
+}
+
+
+.custom-text-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  transition: color .2s linear;
+}
+
+.custom-text-btn:hover {
+  color: rgb(121, 187, 255);
+  transition: color .2s linear;
 }

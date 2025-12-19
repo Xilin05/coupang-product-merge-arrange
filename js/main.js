@@ -259,53 +259,131 @@ const APP = createApp({
     const htmlContent = ref("");
 
     function handleDialogClose(done) {
-      ElementPlus.ElMessageBox.confirm(
-        "确定关闭当前弹窗吗？未保存的数据将丢失。",
-        "提示",
-        {
-          type: "warning",
-        }
-      )
-        .then(() => {
-          done();
-        })
-        .catch(() => {
-          // catch error
-        });
+      // ElementPlus.ElMessageBox.confirm(
+      //   "确定关闭当前弹窗吗？未保存的数据将丢失。",
+      //   "提示",
+      //   {
+      //     type: "warning",
+      //   }
+      // )
+      //   .then(() => {
+      //     done();
+      //   })
+      //   .catch(() => {
+      //     // catch error
+      //   });
     }
 
-    function parseParentRow(row) {
-      const reg_row = /^(\S+)\n(\S+)\n\|\n注册商品ID\s*(\d+)$/;
-      const match = row.children[1].innerText.match(reg_row);
-
-      if (!match) {
-        console.warn(`无法解析父级内容: ${row.children[1].innerText}`);
-        return null; // 匹配失败时返回 null
+    // ========== 工具函数 ========== 开始
+    // 安全获取元素文本内容
+    const getSafeText = (element, selector = null) => {
+      try {
+        const target = selector ? element?.querySelector(selector) : element;
+        return target?.innerText?.trim() || "";
+      } catch {
+        return "";
       }
+    };
+
+    // 安全获取元素属性
+    const getSafeAttribute = (element, attribute) => {
+      try {
+        return element?.[attribute] || "";
+      } catch {
+        return "";
+      }
+    };
+
+    // 从文本中提取ID（如："注册商品ID 15698745841"）
+    const extractIdFromText = (text, prefix) => {
+      if (!text) return "";
+      const match = text.match(new RegExp(`${prefix}\\s+(\\d+)`));
+      return match?.[1] || "";
+    };
+
+    // 从元素中提取ID
+    const extractIdFromElement = (element, prefix) => {
+      return extractIdFromText(getSafeText(element), prefix);
+    };
+    // ========== 工具函数 ========== 结束
+
+    function parseParentRow(row) {
+      const ipContainer = row.querySelector(".ip-container");
+      if (!ipContainer) {
+        throw new Error("未找到 ip-container 元素");
+      }
+
+      const ipRight = ipContainer.querySelector(".ip-right");
+      const productInfo = ipRight?.querySelector(".ip-content");
 
       return {
         rowIndex: row.rowIndex,
-        PN: match[1], // 产品型号
-        shipmentMethod: match[2], // 发货方式
-        RID: match[3], // 注册商品ID
+        PN: getSafeText(ipContainer, ".ip-title"),
+        shipmentMethod: getSafeText(productInfo?.children[0]),
+        RID: extractIdFromText(
+          getSafeText(productInfo?.children[2]),
+          "注册商品ID"
+        ),
       };
     }
 
-    function parseChildRow(row) {
-      const reg_crow = /^(\S+)\n(\S+)\n选项ID\s*(\d+)\n\|\n商品ID\s*(\d+)\s*$/;
-      const match = row.children[1].innerText.match(reg_row);
-
-      if (!match) {
-        console.warn(`无法解析子级内容: ${row.children[1].innerText}`);
-        return null; // 匹配失败时返回 null
+    function parseChildRow(row, parentProduct) {
+      const ipContainer = row.querySelector(".ip-container");
+      if (!ipContainer) {
+        throw new Error("未找到 ip-container 元素");
       }
 
+      const productInfo = ipContainer.querySelector(".ip-right");
+      const ipLeft = ipContainer.querySelector(".ip-left");
+
       return {
-        SKUNAME: cmatch[1], // 尺寸
-        SKU_shipmentMethod: cmatch[2], // 发货方式
-        VID: cmatch[3], // 选项ID
-        PID: cmatch[4], // 商品ID
+        ...parentProduct, // 展开父级产品信息
+        SKUNAME: getSafeText(productInfo, ".ip-title"),
+        SKU_shipmentMethod: getSafeText(
+          productInfo,
+          ".ip-content-registration-type"
+        ),
+        SKUID: extractIdFromElement(
+          productInfo?.children[2]?.children[0],
+          "选项ID"
+        ),
+        VID: extractIdFromElement(
+          productInfo?.children[2]?.children[0],
+          "选项ID"
+        ),
+        PID: extractIdFromElement(
+          productInfo?.children[2]?.children[2],
+          "商品ID"
+        ),
+        skuImgurl: getSafeAttribute(ipLeft?.children[0], "src"),
+        itemRowIndex: row.rowIndex, // 添加当前行的索引
       };
+    }
+
+    function parseProductList(productHtmlList) {
+      const result = [];
+      let currentParent = null;
+
+      productHtmlList.forEach((row, index) => {
+        if (row.className === "table-header") {
+          return; // 使用 return 提前退出当前迭代
+        }
+
+        try {
+          if (row.className == "inventory-line") {
+            currentParent = parseParentRow(row);
+          }
+
+          if (row.className == "item-line" && currentParent) {
+            const childRow = parseChildRow(row, currentParent);
+            result.push(childRow);
+          }
+        } catch (error) {
+          console.error(`处理第 ${index} 行时出错:`, error);
+        }
+      });
+
+      return result;
     }
 
     function parseHTMLContent() {
@@ -331,69 +409,33 @@ const APP = createApp({
         return;
       }
 
-      const productList = Array.from(
-        productElements[0].children[0].children[1].children
+      const productHtmlList = Array.from(
+        productElements?.[0]?.children?.[0]?.children?.[1]?.children
       );
+      console.log("productHtmlList", productHtmlList);
 
-      console.log("解析获取到的 productList", productList);
+      const result = parseProductList(productHtmlList);
+      console.log("解析完成后 result", result);
 
-      const parseProductList = [];
-      let currParent = null;
-      let currRow = null;
+      // 整理解析出来的产品数据，并发布到表格，展示数据
+      formatProductList.value = handleFormat(result);
 
-      const tempParent = {};
-      const tempRow = {};
-
-      // const reg_row = /^(.+)\n(.+)\n\|\n注册商品ID (\d+)$/;
-      // const reg_crow =
-      //   /^([^\n]+)\n([^\n]+)\n选项ID\s+(\d+)\n\|\n商品ID\s+(\d+)\s*$/;
-
-      const reg_row = /^(\S+)\n(\S+)\n\|\n注册商品ID\s*(\d+)$/;
-      const reg_crow = /^(\S+)\n(\S+)\n选项ID\s*(\d+)\n\|\n商品ID\s*(\d+)\s*$/;
-
-      productList.forEach((row, index) => {
-        if (row.className == "inventory-line") {
-          tempParent = {};
-          let match = row.children[1].innerText.match(reg_row);
-          tempParent = {
-            rowIndex: row.rowIndex,
-            // 产品型号: "BSM-030_A20250817"
-            PN: match[1],
-            // 发货方式: "CGF LITE"
-            shipmentMethod: match[2],
-            // 注册商品ID: "15712184814"
-            RID: match[3],
-          };
-        }
-
-        if (row.className == "item-line") {
-          if (row.rowIndex !== tempRow?.rowIndex) {
-            if ("行编号" in tempRow) {
-              parseProductList.push(JSON.parse(JSON.stringify(tempRow)));
-            }
-          }
-
-          let cmatch = row.children[1].innerText.match(reg_crow);
-          tempRow = {
-            ...tempParent,
-            // 尺寸
-            SKUNAME: cmatch[1],
-            // 发货方式
-            SKU_shipmentMethod: cmatch[2],
-            // 选项ID
-            VID: cmatch[3],
-            // 商品ID
-            PID: cmatch[4],
-          };
-        }
-
-        if (index == listcon.length - 1) {
-          parseProductList.push(JSON.parse(JSON.stringify(tempRow)));
-        }
-      });
+      ElementPlus.ElMessage.success(
+        `HTML内容解析成功，共解析出${formatProductList.value.length}条产品数据。`
+      );
 
       parseLoading.value = false;
       // dialogVisible.value = false
+    }
+
+    // 图片预览相关数据与方法
+    const imagePreviewUrl = ref("");
+    const imageRef = ref();
+    const showImagePreview = ref(false);
+
+    function handleImagePreview(url) {
+      imagePreviewUrl.value = url;
+      showImagePreview.value = true;
     }
 
     /** 前期整理数据：筛选被合并曝光的产品 - 结束 */
@@ -415,9 +457,15 @@ const APP = createApp({
 
     function handleCopy(
       value,
-      { keepLineBreak = true, onSuccess = () => {}, onError = () => {} } = {}
+      {
+        mode = "all",
+        keepLineBreak = true,
+        onSuccess = () => {},
+        onError = () => {},
+      } = {}
     ) {
       console.log("keepLineBreak", keepLineBreak);
+      console.log("value", value);
 
       try {
         // 创建元素（textarea 支持换行，input 只能单行）
@@ -425,9 +473,13 @@ const APP = createApp({
           ? document.createElement("textarea")
           : document.createElement("input");
 
-        value = formatProductList.value
-          .map((product) => product.VID)
-          .join("\r\n");
+        if (mode === "single") {
+          value = value || "";
+        } else {
+          value = formatProductList.value
+            .map((product) => product.VID)
+            .join("\r\n");
+        }
         // 设置文本，去掉换行时替换为一个空格
         el.value = keepLineBreak ? value : value.replace(/\n/g, " ");
 
@@ -574,6 +626,10 @@ const APP = createApp({
 
       // 表格 - 相关数据与方法
       PIDSpanMethod,
+      imagePreviewUrl,
+      imageRef,
+      showImagePreview,
+      handleImagePreview,
       handleCopy,
       searchForm,
       handleReset,
