@@ -49,7 +49,7 @@ const APP = createApp({
     // 移除文件
     function handleRemove(file) {
       productFileList.value = productFileList.value.filter(
-        (f) => f.uid !== file.uid
+        f => f.uid !== file.uid
       );
     }
 
@@ -78,16 +78,17 @@ const APP = createApp({
     const excelJsonData = ref([]);
     // 用于存储格式化后的数组
     const formatProductList = ref([]);
+    let formatProductListBackUp = [];
     let excelPidList = [];
     const mergeInfoList = ref([]);
 
     // 分析重复曝光的产品
     function analysisRepeatProduct(list) {
-      excelPidList.forEach((pid) => {
-        const filterIPIDRes = list.filter((item) => item.PID == pid);
+      excelPidList.forEach(pid => {
+        const filterIPIDRes = list.filter(item => item.PID == pid);
         // const filterRepeatRes = group.filter((item, index, self) => self.findIndex(el => el.RID == item.RID) === index)
         const filterRepeatRes = filterIPIDRes.reduce((acc, curr) => {
-          if (!acc.some((product) => product.RID === curr.RID)) {
+          if (!acc.some(product => product.RID === curr.RID)) {
             acc.push(curr);
           }
           return acc;
@@ -102,15 +103,21 @@ const APP = createApp({
       });
     }
 
+    function initTableList(list) {
+      formatProductListBackUp = [...list];
+      formatProductList.value = list;
+      analysisRepeatProduct(list);
+    }
+
     // 上传文件后，处理文件数据
-    const handleFileChange = (uploadFile) => {
+    const handleFileChange = uploadFile => {
       const file = uploadFile.raw;
       if (!file) return;
 
       uploadError.value = ""; // 清空错误信息
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
@@ -149,9 +156,7 @@ const APP = createApp({
           ElementPlus.ElMessage.success("文件校验成功，数据导入中...");
 
           const formatRes = handleFormat(excelJsonData.value);
-          formatProductListBackUp = [...formatRes];
-          formatProductList.value = formatRes;
-          analysisRepeatProduct(formatRes);
+          initTableList(formatRes);
 
           console.log("formatProductList", formatProductList.value);
         } catch (error) {
@@ -179,7 +184,7 @@ const APP = createApp({
     };
 
     // 处理有效数据
-    const processData = (dataArray) => {
+    const processData = dataArray => {
       excelJsonData.value = dataArray.map((row, index) => {
         return {
           RID: row[0] || "",
@@ -217,7 +222,7 @@ const APP = createApp({
        * 3. 每个合并曝光相关的产品注册名称
        */
 
-      list.forEach((element) => {
+      list.forEach(element => {
         let pid = element.PID;
         if (!(pid in groups)) {
           groups[pid] = [];
@@ -234,7 +239,7 @@ const APP = createApp({
       });
 
       const result = [];
-      pidList.forEach((pid) => {
+      pidList.forEach(pid => {
         const group = groups[pid];
 
         group.forEach((item, index) => {
@@ -418,7 +423,8 @@ const APP = createApp({
       console.log("解析完成后 result", result);
 
       // 整理解析出来的产品数据，并发布到表格，展示数据
-      formatProductList.value = handleFormat(result);
+      const formatRes = handleFormat(result);
+      initTableList(formatRes);
 
       ElementPlus.ElMessage.success(
         `HTML内容解析成功，共解析出${formatProductList.value.length}条产品数据。`
@@ -455,10 +461,15 @@ const APP = createApp({
       }
     }
 
+    function handleCopyMenuCommand(command) {
+      handleCopy("", { split: command });
+    }
+
     function handleCopy(
       value,
       {
         mode = "all",
+        split = "linebreak",
         keepLineBreak = true,
         onSuccess = () => {},
         onError = () => {},
@@ -468,18 +479,25 @@ const APP = createApp({
       console.log("value", value);
 
       try {
+        if (mode === "single") {
+          value = value || "";
+        } else {
+          const enumSpiltMethod = {
+            linebreak: "\r\n",
+            comma: ",",
+            space: " ",
+          };
+
+          value = formatProductList.value
+            .map(product => product.VID)
+            .join(enumSpiltMethod[split]);
+        }
+
         // 创建元素（textarea 支持换行，input 只能单行）
         const el = keepLineBreak
           ? document.createElement("textarea")
           : document.createElement("input");
 
-        if (mode === "single") {
-          value = value || "";
-        } else {
-          value = formatProductList.value
-            .map((product) => product.VID)
-            .join("\r\n");
-        }
         // 设置文本，去掉换行时替换为一个空格
         el.value = keepLineBreak ? value : value.replace(/\n/g, " ");
 
@@ -565,10 +583,10 @@ const APP = createApp({
       let searchList = [...formatProductListBackUp];
 
       if (PID_first) {
-        searchList = searchList.filter((info) => info.PID == PID);
+        searchList = searchList.filter(info => info.PID == PID);
       }
 
-      searchList = searchList.filter((info) => {
+      searchList = searchList.filter(info => {
         let ridMatch = info.RID == RID;
         let pidMatch = info.PID == PID;
 
@@ -588,7 +606,7 @@ const APP = createApp({
     }
 
     function wait(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async function handleLoading() {
@@ -630,6 +648,7 @@ const APP = createApp({
       imageRef,
       showImagePreview,
       handleImagePreview,
+      handleCopyMenuCommand,
       handleCopy,
       searchForm,
       handleReset,

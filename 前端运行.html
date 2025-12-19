@@ -15,7 +15,6 @@
   <script src="https://unpkg.com/element-plus"></script>
   <!-- 引入ElementPlus icon组件库 -->
   <script src="https://unpkg.com/@element-plus/icons-vue"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@element-plus/icons-vue"></script> -->
   <!-- 引入SheetJS (xlsx)库 -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
@@ -28,7 +27,6 @@
       <div class="upload-product-excel">
         <el-upload drag action="#" accept=".xlsx, .xls, .csv" class="component-upload" :file-list="productFileList"
           :limit="1" :auto-upload="false" :on-change="handleFileChange">
-          <!-- <el-icon class="el-icon--upload"><upload-filled /></el-icon> -->
           <el-icon size="30" style="color:#909399;">
             <Plus />
           </el-icon>
@@ -67,10 +65,8 @@
       </div>
 
       <div class="merge-description">
-        <!-- <template></template> -->
         <template v-if="!mergeInfoList.length">
           <el-text size="large" type="success" style="display: flex; align-items: center;">
-            <!-- <el-icon><Check /></el-icon> -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="width: 20px; margin-right: 4px;">
               <path fill="currentColor"
                 d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896m-55.808 536.384-99.52-99.584a38.4 38.4 0 1 0-54.336 54.336l126.72 126.72a38.27 38.27 0 0 0 54.336 0l262.4-262.464a38.4 38.4 0 1 0-54.272-54.336z">
@@ -102,57 +98,57 @@
     <div class="product-table">
       <div class="search-box">
         <div class="search-box-items">
-        <!-- 商品曝光id搜索框 -->
-        <div class="search-box-item">
-          <el-input v-model="searchForm.PID" style="width: 320px" placeholder="输入商品曝光ID" clearable>
-            <template #prepend>
-              商品曝光ID
-            </template>
+          <!-- 商品曝光id搜索框 -->
+          <div class="search-box-item">
+            <el-input v-model="searchForm.PID" style="width: 320px" placeholder="输入商品曝光ID" clearable>
+              <template #prepend>
+                商品曝光ID
+              </template>
 
-            <template #append>
-              <el-checkbox v-model="searchForm.PID_first" label="优先" size=""></el-checkbox>
-            </template>
-          </el-input>
-        </div>
+              <template #append>
+                <el-checkbox v-model="searchForm.PID_first" label="优先" size=""></el-checkbox>
+              </template>
+            </el-input>
+          </div>
 
-        <!-- 注册商品id搜索框 -->
-        <div class="search-box-item">
-          <el-input v-model="searchForm.RID" style="width: 320px" placeholder="输入注册商品ID" clearable>
-            <template #prepend>
-              注册商品ID
-            </template>
+          <!-- 注册商品id搜索框 -->
+          <div class="search-box-item">
+            <el-input v-model="searchForm.RID" style="width: 320px" placeholder="输入注册商品ID" clearable>
+              <template #prepend>
+                注册商品ID
+              </template>
 
-            <template #append>
-              <el-checkbox v-model="searchForm.RID_exclude" label="取反" size=""></el-checkbox>
-            </template>
-          </el-input>
-        </div>
+              <template #append>
+                <el-checkbox v-model="searchForm.RID_exclude" label="取反" size=""></el-checkbox>
+              </template>
+            </el-input>
+          </div>
 
-        <!-- 与、或 下拉选项框 -->
-        <div class="search-box-item">
-          <el-select v-model="searchForm.union" placeholder="选择查询方法" style="width: 80px">
-            <el-option :key="0" label="或" :value="0"></el-option>
-            <el-option :key="1" label="与" :value="1"></el-option>
-          </el-select>
-        </div>
+          <!-- 与、或 下拉选项框 -->
+          <div class="search-box-item">
+            <el-select v-model="searchForm.union" placeholder="选择查询方法" style="width: 80px">
+              <el-option :key="0" label="或" :value="0"></el-option>
+              <el-option :key="1" label="与" :value="1"></el-option>
+            </el-select>
+          </div>
 
-        <div class="search-btns">
-          <el-button type="primary" @click="handleSearch">
-            <svg style="width: 14px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-              <path fill="currentColor"
-                d="m795.904 750.72 124.992 124.928a32 32 0 0 1-45.248 45.248L750.656 795.904a416 416 0 1 1 45.248-45.248zM480 832a352 352 0 1 0 0-704 352 352 0 0 0 0 704">
-              </path>
-            </svg>搜索
-          </el-button>
-          <el-button type="danger" @click="handleReset">
-            <svg style="width: 14px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-              <path fill="currentColor"
-                d="M771.776 794.88A384 384 0 0 1 128 512h64a320 320 0 0 0 555.712 216.448H654.72a32 32 0 1 1 0-64h149.056a32 32 0 0 1 32 32v148.928a32 32 0 1 1-64 0v-50.56zM276.288 295.616h92.992a32 32 0 0 1 0 64H220.16a32 32 0 0 1-32-32V178.56a32 32 0 0 1 64 0v50.56A384 384 0 0 1 896.128 512h-64a320 320 0 0 0-555.776-216.384z">
-              </path>
-            </svg>
-            重置
-          </el-button>
-        </div>
+          <div class="search-btns">
+            <el-button type="primary" @click="handleSearch">
+              <svg style="width: 14px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+                <path fill="currentColor"
+                  d="m795.904 750.72 124.992 124.928a32 32 0 0 1-45.248 45.248L750.656 795.904a416 416 0 1 1 45.248-45.248zM480 832a352 352 0 1 0 0-704 352 352 0 0 0 0 704">
+                </path>
+              </svg>搜索
+            </el-button>
+            <el-button type="danger" @click="handleReset">
+              <svg style="width: 14px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+                <path fill="currentColor"
+                  d="M771.776 794.88A384 384 0 0 1 128 512h64a320 320 0 0 0 555.712 216.448H654.72a32 32 0 1 1 0-64h149.056a32 32 0 0 1 32 32v148.928a32 32 0 1 1-64 0v-50.56zM276.288 295.616h92.992a32 32 0 0 1 0 64H220.16a32 32 0 0 1-32-32V178.56a32 32 0 0 1 64 0v50.56A384 384 0 0 1 896.128 512h-64a320 320 0 0 0-555.776-216.384z">
+                </path>
+              </svg>
+              重置
+            </el-button>
+          </div>
         </div>
 
         <div class="table-header-btns">
@@ -180,7 +176,11 @@
             <div style="display: flex; align-items: center; justify-content: center;">
               <el-link type="primary" @click="openCoupangLink(scope.row)">{{ scope.row.PID }}</el-link>
               <div class="custom-text-btn" @click="handleCopy(scope.row.PID, { mode: 'single' })">
-                <svg style="width: 12px; height:16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="M128 320v576h576V320zm-32-64h640a32 32 0 0 1 32 32v640a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V288a32 32 0 0 1 32-32M960 96v704a32 32 0 0 1-32 32h-96v-64h64V128H384v64h-64V96a32 32 0 0 1 32-32h576a32 32 0 0 1 32 32M256 672h320v64H256zm0-192h320v64H256z"></path></svg>
+                <svg style="width: 12px; height:16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+                  <path fill="currentColor"
+                    d="M128 320v576h576V320zm-32-64h640a32 32 0 0 1 32 32v640a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V288a32 32 0 0 1 32-32M960 96v704a32 32 0 0 1-32 32h-96v-64h64V128H384v64h-64V96a32 32 0 0 1 32-32h576a32 32 0 0 1 32 32M256 672h320v64H256zm0-192h320v64H256z">
+                  </path>
+                </svg>
               </div>
             </div>
           </template>
@@ -190,11 +190,15 @@
         <el-table-column label="产品图片" align="center" prop="skuImgurl" width="90">
           <template #default="scope">
             <div style="width: 100%; display: flex; align-items: center; justify-content: center;">
-              <el-image ref="imageRef" style="width: 36px; height: 36px; " :src="scope?.row?.skuImgurl || ''" fit="cover" @click="handleImagePreview(scope?.row?.skuImgurl || '')">
+              <el-image ref="imageRef" style="width: 36px; height: 36px; " :src="scope?.row?.skuImgurl || ''"
+                fit="cover" @click="handleImagePreview(scope?.row?.skuImgurl || '')">
                 <template #error>
-                  <!-- <div class="image-error-placeholder" style=""> -->
-                    <svg t="1766151076232" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4428" width="32" height="32"><path d="M854.5 82h-685c-58.2 0-105.4 49.2-105.4 109.8v640.4c0 60.6 47.2 109.8 105.4 109.8H854.6c58.2 0 105.4-49.2 105.4-109.8V191.8C959.9 131.2 912.7 82 854.5 82zM223.6 223.3l11.3-11.7c8.1-8.4 54.7 22.5 101.4 64.9 46.9-42.8 93.4-73.4 101.5-64.9l11.3 11.7c9.6 10-20.2 57.3-61.3 105.3 41.9 47.3 71.3 94.3 60.6 105.5l-11.3 11.7c-10.6 11-55.3-19.8-100.8-63.1-45.4 43-90.3 74-100.8 63.1L224.3 434c-10.5-11 19.3-58.3 60.7-105.5-40.9-47.8-70.9-95.3-61.4-105.2z m630.9 590.6c-12.9 41.9 0.6 36.6-333.7 36.6-338.1 0-342.2-0.8-351.3-47.8-14.2-73.5 64.8-246.2 122.9-208.3 24.9 16.2 81.4 72.5 105.4 73.2 126.9 3.9 212.1-237.9 298.6-237.9 82.3 0 190.8 278.1 158.1 384.2z" p-id="4429" fill="#cdcdcd"></path></svg>
-                  <!-- </div> -->
+                  <svg t="1766151076232" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="4428" width="32" height="32">
+                    <path
+                      d="M854.5 82h-685c-58.2 0-105.4 49.2-105.4 109.8v640.4c0 60.6 47.2 109.8 105.4 109.8H854.6c58.2 0 105.4-49.2 105.4-109.8V191.8C959.9 131.2 912.7 82 854.5 82zM223.6 223.3l11.3-11.7c8.1-8.4 54.7 22.5 101.4 64.9 46.9-42.8 93.4-73.4 101.5-64.9l11.3 11.7c9.6 10-20.2 57.3-61.3 105.3 41.9 47.3 71.3 94.3 60.6 105.5l-11.3 11.7c-10.6 11-55.3-19.8-100.8-63.1-45.4 43-90.3 74-100.8 63.1L224.3 434c-10.5-11 19.3-58.3 60.7-105.5-40.9-47.8-70.9-95.3-61.4-105.2z m630.9 590.6c-12.9 41.9 0.6 36.6-333.7 36.6-338.1 0-342.2-0.8-351.3-47.8-14.2-73.5 64.8-246.2 122.9-208.3 24.9 16.2 81.4 72.5 105.4 73.2 126.9 3.9 212.1-237.9 298.6-237.9 82.3 0 190.8 278.1 158.1 384.2z"
+                      p-id="4429" fill="#cdcdcd"></path>
+                  </svg>
                 </template>
               </el-image>
             </div>
@@ -204,12 +208,20 @@
         <el-table-column label="选项ID" prop="SKUID"></el-table-column>
         <el-table-column prop="VID">
           <template #header="scope">
-            <!-- <div style="display: flex;justify-content:space-around;align-items:center;"> -->
             <div style="display: flex;align-items:center;">
               <span>选项ID</span>
-              <el-button text type="primary" style="margin-left: 12px;" @click="handleCopy(scope.row)">
-                复制整列
-              </el-button>
+              <el-dropdown size="default" style="margin-left: 12px; line-height: 23px;"  @command="handleCopyMenuCommand">
+                <span class="el-dropdown-link" style="cursor: pointer; color: #409eff;">
+                  选择复制方式<el-icon class="el-icon--right"><arrow-down /></el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="linebreak">保持换行</el-dropdown-item>
+                    <el-dropdown-item command="comma">逗号隔开</el-dropdown-item>
+                    <el-dropdown-item command="space">空格隔开</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </template>
         </el-table-column>
@@ -217,7 +229,6 @@
     </div>
 
     <el-dialog v-model="dialogVisible" title="HTML结构解析JSON" width="1200" :before-close="handleDialogClose">
-      <!-- <span>This is a message</span> -->
       <div class="dialog-html-content">
         <el-input v-model="htmlContent" :autosize="{ minRows: 20, maxRows: 20 }" type="textarea"
           placeholder="请确保产品信息全部展开完整后，粘贴HTML代码" />
@@ -232,32 +243,12 @@
       </template>
     </el-dialog>
 
-    <el-image-viewer v-if="showImagePreview" :url-list="[imagePreviewUrl]" show-progress @close="showImagePreview = false" />
+    <el-image-viewer v-if="showImagePreview" :url-list="[imagePreviewUrl]" show-progress
+      @close="showImagePreview = false" />
   </div>
-
-  <!-- 引入产品数组js文件 -->
-  <!-- <script src="./产品信息JSON/20251212-产品信息json.js"></script> -->
-  <script src="./产品信息JSON/20251216-产品信息json.js"></script>
 
   <!-- vue应用代码文件 -->
   <script src="./js/main.js"></script>
-
-  <script>
-    // fetch('https://www.coupang.com/next-api/products/quantity-info?productId=9239798438&vendorItemId=94271584245')
-    //   .then(response => {
-    //     console.log('response', response);
-
-    //     // 检查响应是否成功
-    //     if (!response.ok) {
-    //       throw new Error('网络响应异常');
-    //     }
-    //     // 解析JSON格式的响应
-    //     return response.json();
-    //   })
-    //   .then(code => {
-    //     console.log('data', data);
-    //   });
-  </script>
 </body>
 
 </html>
