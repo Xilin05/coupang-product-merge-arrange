@@ -74,9 +74,6 @@
             </svg>
             未检测到被合并曝光商品信息
           </el-text>
-          <!-- <div class="empty-merge-list">
-            未检测到被合并曝光商品信息
-          </div> -->
         </template>
         <template v-else>
           <el-descriptions title="被合并曝光商品信息" border>
@@ -205,7 +202,7 @@
           </template>
         </el-table-column>
         <el-table-column label="SKU名称" prop="SKUNAME"></el-table-column>
-        <el-table-column label="选项ID" prop="SKUID"></el-table-column>
+        <!-- <el-table-column label="SKUID(本土店才有)" prop="SKUID"></el-table-column> -->
         <el-table-column prop="VID">
           <template #header="scope">
             <div style="display: flex;align-items:center;">

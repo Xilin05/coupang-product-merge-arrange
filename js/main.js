@@ -49,7 +49,7 @@ const APP = createApp({
     // 移除文件
     function handleRemove(file) {
       productFileList.value = productFileList.value.filter(
-        f => f.uid !== file.uid
+        (f) => f.uid !== file.uid
       );
     }
 
@@ -84,11 +84,11 @@ const APP = createApp({
 
     // 分析重复曝光的产品
     function analysisRepeatProduct(list) {
-      excelPidList.forEach(pid => {
-        const filterIPIDRes = list.filter(item => item.PID == pid);
+      excelPidList.forEach((pid) => {
+        const filterIPIDRes = list.filter((item) => item.PID == pid);
         // const filterRepeatRes = group.filter((item, index, self) => self.findIndex(el => el.RID == item.RID) === index)
         const filterRepeatRes = filterIPIDRes.reduce((acc, curr) => {
-          if (!acc.some(product => product.RID === curr.RID)) {
+          if (!acc.some((product) => product.RID === curr.RID)) {
             acc.push(curr);
           }
           return acc;
@@ -110,14 +110,14 @@ const APP = createApp({
     }
 
     // 上传文件后，处理文件数据
-    const handleFileChange = uploadFile => {
+    const handleFileChange = (uploadFile) => {
       const file = uploadFile.raw;
       if (!file) return;
 
       uploadError.value = ""; // 清空错误信息
 
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
@@ -153,7 +153,7 @@ const APP = createApp({
           const dataWithoutHeader = dataArray.slice(1);
           processData(dataWithoutHeader);
 
-          ElementPlus.ElMessage.success("文件校验成功，数据导入中...");
+          // ElementPlus.ElMessage.success("文件校验成功，数据导入中...");
 
           const formatRes = handleFormat(excelJsonData.value);
           initTableList(formatRes);
@@ -184,7 +184,7 @@ const APP = createApp({
     };
 
     // 处理有效数据
-    const processData = dataArray => {
+    const processData = (dataArray) => {
       excelJsonData.value = dataArray.map((row, index) => {
         return {
           RID: row[0] || "",
@@ -222,7 +222,7 @@ const APP = createApp({
        * 3. 每个合并曝光相关的产品注册名称
        */
 
-      list.forEach(element => {
+      list.forEach((element) => {
         let pid = element.PID;
         if (!(pid in groups)) {
           groups[pid] = [];
@@ -239,7 +239,7 @@ const APP = createApp({
       });
 
       const result = [];
-      pidList.forEach(pid => {
+      pidList.forEach((pid) => {
         const group = groups[pid];
 
         group.forEach((item, index) => {
@@ -264,6 +264,7 @@ const APP = createApp({
     const htmlContent = ref("");
 
     function handleDialogClose(done) {
+      dialogVisible.value = false;
       // ElementPlus.ElMessageBox.confirm(
       //   "确定关闭当前弹窗吗？未保存的数据将丢失。",
       //   "提示",
@@ -431,7 +432,7 @@ const APP = createApp({
       );
 
       parseLoading.value = false;
-      // dialogVisible.value = false
+      dialogVisible.value = false;
     }
 
     // 图片预览相关数据与方法
@@ -489,7 +490,7 @@ const APP = createApp({
           };
 
           value = formatProductList.value
-            .map(product => product.VID)
+            .map((product) => product.VID)
             .join(enumSpiltMethod[split]);
         }
 
@@ -583,10 +584,10 @@ const APP = createApp({
       let searchList = [...formatProductListBackUp];
 
       if (PID_first) {
-        searchList = searchList.filter(info => info.PID == PID);
+        searchList = searchList.filter((info) => info.PID == PID);
       }
 
-      searchList = searchList.filter(info => {
+      searchList = searchList.filter((info) => {
         let ridMatch = info.RID == RID;
         let pidMatch = info.PID == PID;
 
@@ -606,7 +607,7 @@ const APP = createApp({
     }
 
     function wait(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     async function handleLoading() {
